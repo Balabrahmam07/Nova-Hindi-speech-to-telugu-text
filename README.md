@@ -27,19 +27,15 @@ Welcome to the **Nova: Hindi to Telugu Translator** project! This is an AI-power
 
 To run this project, you need to install the following dependencies:
 
-1. Clone the repository to your local machine:
+1. SpeechRecognition:Handles speech recognition
    ```bash
-   git clone https://github.com/Balabrahmam07/Nova-Hindi-speech-to-telugu-text.git
-
-
-2. Navigate into the project directory: 
+   pip install SpeechRecognition
+2. pyttsx3: A text-to-speech conversion library that works offline
+    ```bash   
+   pip install pyttsx3
+3. translate: To translate the recognized text from one language to another (Hindi to Telugu in this case)
    ```bash
-   cd Nova-Hindi-to-Telugu-Translator
-
-3. Install the required dependencies: 
-   ```bash
-   pip install speechrecognition pyttsx3 translate tkinter
-
+   pip install translate
 4. Run the application: 
    ```bash
    python main.py
