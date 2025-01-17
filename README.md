@@ -32,13 +32,17 @@ To run this project, you need to install the following dependencies:
    git clone https://github.com/Balabrahmam07/Nova-Hindi-speech-to-telugu-text.git
 
 
-2.Navigate into the project directory: 
+2. Navigate into the project directory: 
    ```bash
    cd Nova-Hindi-to-Telugu-Translator
 
-3.Install the required dependencies: pip install speechrecognition pyttsx3 translate tkinter
+3. Install the required dependencies: 
+   ```bash
+   pip install speechrecognition pyttsx3 translate tkinter
 
-4.Run the application: python main.py
+4. Run the application: 
+   ```bash
+   python main.py
 
 
 ### Key Adjustments:
