@@ -1,6 +1,5 @@
 # Nova-Hindi-speech-to-telugu-text
 
-# Nova: Hindi to Telugu Translator
 
 Welcome to the **Nova: Hindi to Telugu Translator** project! This is an AI-powered application that allows users to translate spoken Hindi into Telugu. The application uses **speech recognition**, **machine translation**, and **text-to-speech** technologies to make translations both interactive and accessible.
 
