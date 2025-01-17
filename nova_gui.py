@@ -4,6 +4,12 @@ import tkinter as tk
 from tkinter import ttk
 import pyttsx3
 from tkinter import messagebox
+import threading
+
+
+# Global flag to manage speech recognition state
+is_listening = False
+recognizer = sr.Recognizer()
 
 
 def translate_text(text, src_language="hi", target_language="te"):
@@ -12,37 +18,61 @@ def translate_text(text, src_language="hi", target_language="te"):
 
 
 def recognize_and_translate():
-    recognizer = sr.Recognizer()
+    global is_listening
+    is_listening = True
 
     try:
         with sr.Microphone() as source:
             output_label.config(text="🎤 Listening... Speak something in Hindi!")
             root.update()
-            audio = recognizer.listen(source)
 
-        hindi_text = recognizer.recognize_google(audio, language="hi-IN")
-        hindi_text_label.config(text="🗣️ You said: " + hindi_text)
+            # Continuously listen to audio until is_listening is set to False
+            while is_listening:
+                audio = recognizer.listen(source, timeout=5)  # Adjust timeout as needed
+                try:
+                    hindi_text = recognizer.recognize_google(audio, language="hi-IN")
+                    hindi_text_label.config(text="🗣️ You said: " + hindi_text)
 
-        telugu_text = translate_text(hindi_text)
-        telugu_text_label.config(text="🌐 Telugu Translation: " + telugu_text)
+                    telugu_text = translate_text(hindi_text)
+                    telugu_text_label.config(text="🌐 Telugu Translation: " + telugu_text)
 
-        # Add voice feedback (Text-to-Speech)
-        engine = pyttsx3.init()
-        engine.say(f"The translation in Telugu is: {telugu_text}")
-        engine.runAndWait()
+                    # Add voice feedback (Text-to-Speech)
+                    engine = pyttsx3.init()
+                    engine.say(f"The translation in Telugu is: {telugu_text}")
+                    engine.runAndWait()
 
-        output_label.config(text="✔️ Translation Complete!")
-
-    except sr.UnknownValueError:
-        output_label.config(text="⚠️ Speech recognition could not understand audio.")
-        messagebox.showinfo("Error", "Speech recognition could not understand audio.")
-    except sr.RequestError as e:
-        output_label.config(text=f"⚠️ Could not request results from Google Speech Recognition service; {e}")
-        messagebox.showinfo("Error", f"Could not request results from Google Speech Recognition service; {e}")
+                    output_label.config(text="✔️ Translation Complete!")
+                    break
+                except sr.UnknownValueError:
+                    output_label.config(text="⚠️ Could not understand audio.")
+                except sr.RequestError as e:
+                    output_label.config(text=f"⚠️ Could not request results from Google Speech Recognition service; {e}")
+                except Exception as e:
+                    output_label.config(text="⚠️ An unexpected error occurred.")
+                    print(f"Error: {e}")
+            else:
+                output_label.config(text="🛑 Listening stopped manually.")
     except Exception as e:
-        output_label.config(text="⚠️ An unexpected error occurred.")
-        messagebox.showinfo("Error", "An unexpected error occurred.")
+        output_label.config(text="⚠️ An error occurred.")
         print(f"Error: {e}")
+    finally:
+        is_listening = False
+        stop_button.config(state="disabled")
+        recognize_button.config(state="normal")
+
+
+def stop_listening():
+    global is_listening
+    is_listening = False
+    output_label.config(text="🛑 Listening stopped.")
+    stop_button.config(state="disabled")
+    recognize_button.config(state="normal")
+
+
+def start_listening_thread():
+    stop_button.config(state="normal")
+    recognize_button.config(state="disabled")
+    threading.Thread(target=recognize_and_translate, daemon=True).start()
 
 
 # Set up the main application window
@@ -100,10 +130,19 @@ telugu_text_label.pack(pady=15)
 recognize_button = ttk.Button(
     frame,
     text="🎙️ Start to Speak",
-    command=recognize_and_translate,
+    command=start_listening_thread,  # Start the listening in a separate thread
     style="Custom.TButton",
 )
-recognize_button.pack(pady=30)
+recognize_button.pack(pady=15)
+
+stop_button = ttk.Button(
+    frame,
+    text="🛑 Stop Listening",
+    command=stop_listening,
+    style="Custom.TButton",
+)
+stop_button.pack(pady=15)
+stop_button.config(state="disabled")  # Initially disable the stop button
 
 # Customize button style with a modern touch
 style = ttk.Style()
