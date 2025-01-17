@@ -6,16 +6,13 @@ import pyttsx3
 from tkinter import messagebox
 import threading
 
-
 # Global flag to manage speech recognition state
 is_listening = False
 recognizer = sr.Recognizer()
 
-
 def translate_text(text, src_language="hi", target_language="te"):
     translator = Translator(from_lang=src_language, to_lang=target_language)
     return translator.translate(text)
-
 
 def recognize_and_translate():
     global is_listening
@@ -24,6 +21,7 @@ def recognize_and_translate():
     try:
         with sr.Microphone() as source:
             output_label.config(text="🎤 Listening... Speak something in Hindi!")
+            loading_label.config(text="🔄 Processing...", foreground="#FF5733")  # Show processing message
             root.update()
 
             # Continuously listen to audio until is_listening is set to False
@@ -42,6 +40,7 @@ def recognize_and_translate():
                     engine.runAndWait()
 
                     output_label.config(text="✔️ Translation Complete!")
+                    
                     break
                 except sr.UnknownValueError:
                     output_label.config(text="⚠️ Could not understand audio.")
@@ -52,6 +51,7 @@ def recognize_and_translate():
                     print(f"Error: {e}")
             else:
                 output_label.config(text="🛑 Listening stopped manually.")
+                loading_label.config(text="")  # Clear the processing label
     except Exception as e:
         output_label.config(text="⚠️ An error occurred.")
         print(f"Error: {e}")
@@ -60,20 +60,19 @@ def recognize_and_translate():
         stop_button.config(state="disabled")
         recognize_button.config(state="normal")
 
-
 def stop_listening():
     global is_listening
     is_listening = False
     output_label.config(text="🛑 Listening stopped.")
     stop_button.config(state="disabled")
     recognize_button.config(state="normal")
-
+    loading_label.config(text="")  # Clear processing label when stopped
 
 def start_listening_thread():
     stop_button.config(state="normal")
     recognize_button.config(state="disabled")
+    loading_label.config(text="🔄 Processing...", foreground="#FF5733")  # Show processing message when started
     threading.Thread(target=recognize_and_translate, daemon=True).start()
-
 
 # Set up the main application window
 root = tk.Tk()
@@ -127,6 +126,15 @@ telugu_text_label = ttk.Label(
 )
 telugu_text_label.pack(pady=15)
 
+loading_label = ttk.Label(
+    frame,
+    text="",
+    font=("Arial", 14, "italic"),
+    background="#ffffff",
+    foreground="#FF5733",  # Color for loading message
+)
+loading_label.pack(pady=15)
+
 recognize_button = ttk.Button(
     frame,
     text="🎙️ Start to Speak",
@@ -137,7 +145,7 @@ recognize_button.pack(pady=15)
 
 stop_button = ttk.Button(
     frame,
-    text="🛑 Stop Listening",
+    text="🛑  Stop Listening",
     command=stop_listening,
     style="Custom.TButton",
 )
